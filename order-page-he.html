@@ -50,6 +50,11 @@
         <button class="category-button" onclick="filterCategory('acid')">חמוץ</button>
         <button class="category-button" onclick="filterCategory('woody')">עור ועץ</button>
         <button class="category-button" onclick="filterCategory('acid_sweet')">חומץ מתוק</button>
+        <button class="category-button" onclick="filterCategory('eastern')">מזרחי</button>
+        <button class="category-button" onclick="filterCategory('floral')">פרחוני</button>
+        <button class="category-button" onclick="filterCategory('fruity')">פירותית</button>
+        <button class="category-button" onclick="filterCategory('oriental')">אוריינטל</button>
+        <button class="category-button" onclick="filterCategory('citrus')">הדרי</button>
     </div>
 
     <div id="perfume-list"></div>
@@ -67,13 +72,19 @@
                 const container = document.getElementById("perfume-list");
 
                 data.slice(1).forEach(row => {
-                    const [code, desc, img, price, acidSweet, woody, acid, fresh, sweet] = row;
+                    const [code, desc, img, price, acidSweet, woody, acid, fresh, sweet,
+                           eastern, floral, fruity, oriental, citrus] = row;
                     let classes = "";
                     if (acidSweet == 1) classes += " acid_sweet";
                     if (woody == 1) classes += " woody";
                     if (acid == 1) classes += " acid";
                     if (fresh == 1) classes += " fresh";
                     if (sweet == 1) classes += " sweet";
+                    if (eastern == 1) classes += " eastern";
+                    if (floral == 1) classes += " floral";
+                    if (fruity == 1) classes += " fruity";
+                    if (oriental == 1) classes += " oriental";
+                    if (citrus == 1) classes += " citrus";
 
                     container.innerHTML += `
                         <div class="perfume${classes}">
