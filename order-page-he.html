@@ -1,117 +1,101 @@
-
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>דף הזמנה עם מתנה</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <style>
-    body { background: #111; color: #fff; font-family: Arial; margin: 0; padding-bottom: 300px; }
-    .product { width: 30%; margin: 1%; background: #222; border-radius: 10px; padding: 10px; float: right; text-align: center; }
-    .product img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; }
-    .product-name { color: yellow; font-size: 18px; margin: 10px 0; }
-    .cart-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e1e1e;
-      padding: 20px;
-      z-index: 999;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .cart-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      background: #333;
-      padding: 10px;
-      border-radius: 12px;
-    }
-    .cart-item img {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      margin-left: 10px;
-    }
-    .cart-info {
-      flex: 1;
-      font-size: 18px;
-    }
-    .remove-btn {
-      background: red;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      justify-content: center;
-      align-items: flex-start;
-      padding-top: 50px;
-      z-index: 1000;
-    }
-    .popup-content {
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      overflow-y: auto;
-      text-align: center;
-    }
-    .popup-content .gift {
-      width: 45%;
-      display: inline-block;
-      margin: 5px;
-    }
-    .gift img { width: 100%; border-radius: 8px; }
-    .whatsapp-link, .gift-btn {
-      display: inline-block;
-      background: #25D366;
-      color: white;
-      text-decoration: none;
-      padding: 10px 15px;
-      margin: 10px 5px 0;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-    .gift-btn { background: orange; }
-  </style>
+    <meta charset="UTF-8">
+    <title>קטלוג הבשמים</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .category-button {
+            background-color: #2e2e2e;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .category-button:hover {
+            background-color: #444;
+        }
+        .perfume {
+            display: inline-block;
+            background: white;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 200px;
+            vertical-align: top;
+        }
+        .perfume img {
+            width: 100%;
+            border-radius: 6px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div id="products"></div>
+    <h1>🌟 קטלוג הבשמים 🌟</h1>
+    <div>
+        <button class="category-button" onclick="filterCategory('all')">הצג הכל</button>
+        <button class="category-button" onclick="filterCategory('sweet')">מתוק</button>
+        <button class="category-button" onclick="filterCategory('fresh')">מרענן</button>
+        <button class="category-button" onclick="filterCategory('acid')">חמוץ</button>
+        <button class="category-button" onclick="filterCategory('woody')">עור ועץ</button>
+        <button class="category-button" onclick="filterCategory('acid_sweet')">חומץ מתוק</button>
+    </div>
 
-  <div class="popup" id="giftPopup">
-    <div class="popup-content">
-      <h3>🎁 בחר מתנה</h3>
-      <div id="giftList"></div>
-      <br>
-      <button onclick="$('#giftPopup').hide()">סגור</button>
-    </div>
-  </div>
+    <div id="perfume-list"></div>
 
-  <div class="cart-bar">
-    <div id="cartItems"></div>
-    <div style="text-align:center; font-size: 20px; margin-top: 10px;">
-      💰 סך הכל: <span id="cartTotal">0</span> ₪
-    </div>
-    <div style="text-align:center">
-      <a id="waLink" href="https://wa.me/972524033442?text=" target="_blank" class="whatsapp-link">שלח הזמנה בווטסאפ</a>
-      <a id="giftBtn" href="#" class="gift-btn" style="display:none" onclick="showGifts()">🎁 יש לך מתנה</a>
-    </div>
-  </div>
+    <script>
+        const sheetID = "1t2TMP8Z0l_THNxeAzgfgEuguC-DDRfcRG1BQiuaaU7E";
+        const sheetName = "Sheet1";
+        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}`;
+
+        fetch(url)
+            .then(res => res.text())
+            .then(rep => {
+                const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
+                const data = jsonData.table.rows.map(row => row.c.map(cell => cell ? cell.v : ""));
+                const container = document.getElementById("perfume-list");
+
+                data.slice(1).forEach(row => {
+                    const [code, desc, img, price, acidSweet, woody, acid, fresh, sweet] = row;
+                    let classes = "";
+                    if (acidSweet == 1) classes += " acid_sweet";
+                    if (woody == 1) classes += " woody";
+                    if (acid == 1) classes += " acid";
+                    if (fresh == 1) classes += " fresh";
+                    if (sweet == 1) classes += " sweet";
+
+                    container.innerHTML += `
+                        <div class="perfume${classes}">
+                            <img src="${img}" alt="${code}">
+                            <h3>${code}</h3>
+                            <p>סוג: ${desc}</p>
+                            <p>מחיר: ${price} ₪</p>
+                        </div>
+                    `;
+                });
+            });
+
+        function filterCategory(cat) {
+            const items = document.querySelectorAll(".perfume");
+            items.forEach(el => {
+                if (cat === "all" || el.classList.contains(cat)) {
+                    el.classList.remove("hidden");
+                } else {
+                    el.classList.add("hidden");
+                }
+            });
+        }
+    </script>
 </body>
 </html>
