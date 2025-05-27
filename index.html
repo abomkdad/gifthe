@@ -1,223 +1,101 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>דף הזמנה עם מתנה</title>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <style>
-    body { background: #111; color: #fff; font-family: Arial; margin: 0; padding-bottom: 300px; }
-    .product { width: 30%; margin: 1%; background: #222; border-radius: 10px; padding: 10px; float: right; text-align: center; }
-    .product img { width: 100%; aspect-ratio: 1/1; border-radius: 8px; }
-    .product-name { color: yellow; font-size: 18px; margin: 10px 0; }
-    .cart-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e1e1e;
-      padding: 20px;
-      z-index: 999;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-    .cart-item {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      background: #333;
-      padding: 10px;
-      border-radius: 12px;
-    }
-    .cart-item img {
-      width: 60px;
-      height: 60px;
-      border-radius: 10px;
-      margin-left: 10px;
-    }
-    .cart-info {
-      flex: 1;
-      font-size: 18px;
-    }
-    .remove-btn {
-      background: red;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      padding: 5px 10px;
-      cursor: pointer;
-    }
-    .popup {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.9);
-      display: none;
-      justify-content: center;
-      align-items: flex-start;
-      padding-top: 50px;
-      z-index: 1000;
-    }
-    .popup-content {
-      background: #222;
-      padding: 20px;
-      border-radius: 12px;
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      overflow-y: auto;
-      text-align: center;
-    }
-    .popup-content .gift {
-      width: 45%;
-      display: inline-block;
-      margin: 5px;
-    }
-    .gift img { width: 100%; border-radius: 8px; }
-    .whatsapp-link, .gift-btn {
-      display: inline-block;
-      background: #25D366;
-      color: white;
-      text-decoration: none;
-      padding: 10px 15px;
-      margin: 10px 5px 0;
-      border-radius: 10px;
-      font-size: 18px;
-    }
-    .gift-btn { background: orange; }
-  </style>
+    <meta charset="UTF-8">
+    <title>קטלוג הבשמים</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .category-button {
+            background-color: #2e2e2e;
+            color: white;
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .category-button:hover {
+            background-color: #444;
+        }
+        .perfume {
+            display: inline-block;
+            background: white;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            width: 200px;
+            vertical-align: top;
+        }
+        .perfume img {
+            width: 100%;
+            border-radius: 6px;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-  <div id="products"></div>
-
-  <div class="popup" id="giftPopup">
-    <div class="popup-content">
-      <h3>🎁 בחר מתנה</h3>
-      <div id="giftList"></div>
-      <br>
-      <button onclick="$('#giftPopup').hide()">סגור</button>
+    <h1>🌟 קטלוג הבשמים 🌟</h1>
+    <div>
+        <button class="category-button" onclick="filterCategory('all')">הצג הכל</button>
+        <button class="category-button" onclick="filterCategory('sweet')">מתוק</button>
+        <button class="category-button" onclick="filterCategory('fresh')">מרענן</button>
+        <button class="category-button" onclick="filterCategory('acid')">חמוץ</button>
+        <button class="category-button" onclick="filterCategory('woody')">עור ועץ</button>
+        <button class="category-button" onclick="filterCategory('acid_sweet')">חומץ מתוק</button>
     </div>
-  </div>
 
-  <div class="cart-bar">
-    <div id="cartItems"></div>
-    <div style="text-align:center; font-size: 20px; margin-top: 10px;">
-      💰 סך הכל: <span id="cartTotal">0</span> ₪
-    </div>
-    <div style="text-align:center">
-      <a id="waLink" href="https://wa.me/972524033442?text=" target="_blank" class="whatsapp-link">שלח הזמנה בווטסאפ</a>
-      <a id="giftBtn" href="#" class="gift-btn" style="display:none" onclick="showGifts()">🎁 יש לך מתנה</a>
-    </div>
-  </div>
-  
- <div style="padding: 20px; text-align: center; font-size: 14px; color: #bbb;">
-    על ידי שימוש באתר זה, אתה מסכים למדיניות הפרטיות שלנו.<a href="https://madperfume.co.il/?app=page.show.6" target="_blank" style="color: #4dd0e1; text-decoration: underline;"> מדיניות הפרטיות</a>  .
- </div> 
+    <div id="perfume-list"></div>
 
-  <script>
-  let cart = [], gifts300 = [], gifts500 = [], products = [];
-  const shippingCost = 50;
+    <script>
+        const sheetID = "1t2TMP8Z0l_THNxeAzgfgEuguC-DDRfcRG1BQiuaaU7E";
+        const sheetName = "Sheet1";
+        const url = `https://docs.google.com/spreadsheets/d/${sheetID}/gviz/tq?sheet=${sheetName}`;
 
-  function updateCart() {
-    let total = 0;
-    let message = 'רשימת הזמנה:\n';
-    $('#cartItems').empty();
-    cart.forEach((p, i) => {
-      const qty = p.qty || 1;
-      const isGift = p.price === 0;
-      total += p.price * qty;
-      const name = isGift ? `🎁 ${p.name}` : p.name;
-      $('#cartItems').append(`
-        <div class="cart-item">
-          <img src="${p.img}" />
-          <div class="cart-info">${p.code} | ${name} × ${qty}</div>
-          <button class="remove-btn" onclick="removeItem(${i})">🗑 מחק</button>
-        </div>
-      `);
-      message += `- ${p.code} | ${p.name} x ${qty}\n`;
-    });
-    total += shippingCost;
-    message += `\n🚚 דמי משלוח: ${shippingCost} ₪\nסה\"כ כולל משלוח: ${total} ₪`;
-    $('#cartTotal').text(total);
-    $('#waLink').attr('href', `https://wa.me/972524033442?text=${encodeURIComponent(message)}`);
-    $('#giftBtn').toggle(total >= 300);
-  }
+        fetch(url)
+            .then(res => res.text())
+            .then(rep => {
+                const jsonData = JSON.parse(rep.substring(47).slice(0, -2));
+                const data = jsonData.table.rows.map(row => row.c.map(cell => cell ? cell.v : ""));
+                const container = document.getElementById("perfume-list");
 
-  function removeItem(index) {
-    cart.splice(index, 1);
-    updateCart();
-  }
+                data.slice(1).forEach(row => {
+                    const [code, desc, img, price, acidSweet, woody, acid, fresh, sweet] = row;
+                    let classes = "";
+                    if (acidSweet == 1) classes += " acid_sweet";
+                    if (woody == 1) classes += " woody";
+                    if (acid == 1) classes += " acid";
+                    if (fresh == 1) classes += " fresh";
+                    if (sweet == 1) classes += " sweet";
 
-  function addToCart(product) {
-    cart.push({ ...product, qty: 1 });
-    updateCart();
-  }
+                    container.innerHTML += `
+                        <div class="perfume${classes}">
+                            <img src="${img}" alt="${code}">
+                            <h3>${code}</h3>
+                            <p>סוג: ${desc}</p>
+                            <p>מחיר: ${price} ₪</p>
+                        </div>
+                    `;
+                });
+            });
 
-  function showGifts() {
-    $('#giftList').empty();
-    const total = parseFloat($('#cartTotal').text()) || 0;
-    const list = total >= 500 ? gifts500 : gifts300;
-    list.forEach(g => {
-      $('#giftList').append(`
-        <div class="gift" onclick="selectGift(${g.id})">
-          <img src="${g.img}" />
-          <div class="product-name">${g.name}</div>
-        </div>
-      `);
-    });
-    $('#giftPopup').show();
-  }
-
-  function selectGift(id) {
-    const alreadyHasGift = cart.some(item => item.price === 0);
-    if (alreadyHasGift) return;
-    const g = products.find(p => p.id === id);
-    cart.push({ ...g, qty: 1, price: 0 });
-    updateCart();
-    $('#giftPopup').hide();
-  }
-
-  $(document).ready(function () {
-    $.get("https://docs.google.com/spreadsheets/d/1g3_D2NBwT27O2OI-v1R5tAB2QCfF3_ZCUL9sSLoCv54/gviz/tq?tqx=out:json", d => {
-      const json = JSON.parse(d.substr(47).slice(0, -2));
-      const rows = json.table.rows;
-      let id = 0;
-      rows.forEach(r => {
-        const code = r.c[0]?.v || '';
-        const name = r.c[1]?.v || '';
-        const price = parseFloat(r.c[5]?.v || 0);
-        const img = r.c[3]?.v || 'https://via.placeholder.com/150';
-        const g = (r.c[6]?.v || '').toLowerCase().trim();
-        const h = (r.c[7]?.v || '').toLowerCase().trim();
-        const prod = { id, code, name, price, img };
-
-        if (g.includes('watch')) {
-          gifts500.push(prod);
-          products.push(prod);
-          id++;
-          return;
+        function filterCategory(cat) {
+            const items = document.querySelectorAll(".perfume");
+            items.forEach(el => {
+                if (cat === "all" || el.classList.contains(cat)) {
+                    el.classList.remove("hidden");
+                } else {
+                    el.classList.add("hidden");
+                }
+            });
         }
-        if (h.includes('watch')) {
-          gifts300.push(prod);
-          products.push(prod);
-          id++;
-          return;
-        }
-
-        products.push(prod);
-        $('#products').append(`
-          <div class="product" onclick='addToCart(${JSON.stringify(prod)})'>
-            <img src="${img}" />
-            <div class="product-name">${name}</div>
-          </div>
-        `);
-        id++;
-      });
-    });
-  });
-</script>
+    </script>
 </body>
 </html>
